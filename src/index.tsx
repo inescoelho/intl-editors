@@ -27,7 +27,11 @@ const is = require("react-intl/locale-data/is");
 
 addLocaleData([...en, ...fr, ...is]);
 
-class Editors extends React.Component {
+interface Props {
+  allowNegative: boolean;
+  title: string;
+}
+class Editors extends React.Component<Props> {
   state = {
     locale: "en-US",
     minimumFractionDigits: 3,
@@ -44,7 +48,7 @@ class Editors extends React.Component {
       <IntlProvider locale={this.state.locale} key={key}>
         <div>
           <fieldset>
-            <legend>Editors</legend>
+            <legend>{this.props.title}</legend>
             <div style={{ margin: 20 }}>
               <div style={{ marginTop: 20 }}>
                 <label>
@@ -100,6 +104,7 @@ class Editors extends React.Component {
                   Grid Integer Editor:
                   <GridIntegerEditor
                     defaultValue={2}
+                    allowNegative={this.props.allowNegative}
                   />
                 </label>
               </div>
@@ -108,6 +113,7 @@ class Editors extends React.Component {
                   Grid Decimal Editor:
                   <GridDecimalEditor
                     defaultValue={2}
+                    allowNegative={this.props.allowNegative}
                     minimumFractionDigits={this.state.minimumFractionDigits || undefined}
                     maximumFractionDigits={this.state.maximumFractionDigits || undefined}
                   />
@@ -129,6 +135,7 @@ class Editors extends React.Component {
                   Grid Percent Editor:
                   <GridPercentEditor
                     defaultValue={0.2}
+                    allowNegative={this.props.allowNegative}
                     minimumFractionDigits={this.state.minimumFractionDigits || undefined}
                     maximumFractionDigits={this.state.maximumFractionDigits || undefined}
                   />
@@ -324,7 +331,8 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <Editors />
+        <Editors title="Editors" allowNegative={false}/>
+        <Editors title="Editors with Negative values" allowNegative={true}/>
         <Formatters />
       </div>
     );
