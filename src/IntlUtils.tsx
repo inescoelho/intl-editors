@@ -32,7 +32,7 @@ export function getDecimalSeparator({ formatNumber }: InjectedIntl) {
   return testValue[1];
 }
 
-export function parseDecimal(value: unknown, decimalSeparator: string) {
+export function parseDecimal(value: unknown, decimalSeparator: string, allowNegative: boolean) {
   // Return the value as-is if it's already a number
   if (typeof value === 'number') {
     return value;
@@ -45,6 +45,7 @@ export function parseDecimal(value: unknown, decimalSeparator: string) {
 
     // Build regex to strip out everything except digits and decimal point
     const regex = new RegExp(`[^0-9${decimalSeparator}]`, 'g');
+    const isNegative = allowNegative && /^-/.test(value);
     const parsedValue = parseFloat(
       value
         .replace(regex, '') // strip out any cruft
@@ -52,7 +53,7 @@ export function parseDecimal(value: unknown, decimalSeparator: string) {
     );
 
     if (!Number.isNaN(parsedValue)) {
-      return parsedValue;
+      return isNegative ? parsedValue * -1 : parsedValue;
     }
   }
 

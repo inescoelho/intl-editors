@@ -30,8 +30,11 @@ export const replaceAll = (
   return stringToWorkOn.replace(re, stringToReplaceWith);
 };
 
+const NEGATIVE_SYMBOL = '-';
 const DECIMAL_REGEX = /[.,]/;
+const NEGATIVE_DECIMAL_REGEX = /^-[.,]/;
 const NUMBER_REGEX = /^\d*[.,]?\d*$/;
+const NEGATIVE_NUMBER_REGEX = /^-?\d*[.,]?\d*$/;
 const NBSP = '\u00A0';
 
 export type NumberEditorChildrenProps = { isInvalid: boolean; getInputProps: () => InputProps; };
@@ -50,6 +53,7 @@ type SupportedNumberFormatOptions = Pick<
 
 export type NumberEditorProps = SupportedHtmlInputProps & SupportedNumberFormatOptions & {
   value?: number;
+  allowNegative?: boolean;
   defaultFractionDigits?: number;
   extraFractionDigits?: number;
   children: NumberEditorChildren;
@@ -70,8 +74,15 @@ function replaceDecimalSeparator(value: string | number | undefined | null, sepa
     : '';
 }
 
+function removeNegativeSymbol(value: string | number | undefined | null) {
+  return value != null
+    ? value.toString().slice(1)
+    : '';
+}
+
 class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEditorBaseState> {
   readonly decimalSeparator: string;
+  readonly allowNegative: boolean;
   readonly minimumFractionDigits: number;
   readonly maximumFractionDigits: number;
   readonly state: Readonly<NumberEditorBaseState>;
@@ -80,7 +91,7 @@ class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEdit
 
   constructor(props: NumberEditorBaseProps) {
     super(props);
-    const { intl, currency, style, minimumFractionDigits, maximumFractionDigits, defaultFractionDigits, extraFractionDigits } = this.props;
+    const { intl, currency, style, minimumFractionDigits, maximumFractionDigits, defaultFractionDigits, extraFractionDigits, allowNegative = false } = this.props;
     // The default value of minimumFractionDigits for currency formatting is the number of minor unit digits provided by the ISO 4217 currency code list
     // If the maximumFractionDigits value is less than the default minimumFractionDigits then Intl.NumberFormat throws an error.
     let minimumFractionDigitsForStyle = minimumFractionDigits;
@@ -101,6 +112,7 @@ class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEdit
       maximumFractionDigits
     });
 
+    this.allowNegative = allowNegative;
     this.decimalSeparator = getDecimalSeparator(intl);
     this.minimumFractionDigits = minimumFractionDigitsForLocale;
     this.maximumFractionDigits = maximumFractionDigitsForLocale;
@@ -152,6 +164,9 @@ class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEdit
     const allowedValue = this.props.intl.formatNumber(valueToTest, options);
     return pastedValue === replaceAll(allowedValue, NBSP, ' ');
   }
+
+  checkValidity = (value: string | number = '') =>
+    this.allowNegative ? NEGATIVE_NUMBER_REGEX.test(value.toString()) : NUMBER_REGEX.test(value.toString());
 
   isPastedValueValid(pastedValue: string, parsedValue: number) {
     // If the formatted value is same as the pasted value then it is considered valid
@@ -264,7 +279,7 @@ class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEdit
 
   handleCopyPaste = (pastedValue: string) => {
     this.isCopyPaste = false;
-    const parsedValue = parseNumber(pastedValue, this.decimalSeparator);
+    const parsedValue = parseNumber(pastedValue, this.decimalSeparator, this.allowNegative);
     const isInvalid = parsedValue == null || !this.isPastedValueValid(pastedValue, parsedValue);
 
     if (isInvalid) {
@@ -302,8 +317,17 @@ class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEdit
       return;
     }
 
+    if (value === NEGATIVE_SYMBOL) {
+      this.internalSetState({
+        value: undefined,
+        displayValue: this.allowNegative ? NEGATIVE_SYMBOL : '',
+        isInvalid: false
+      });
+      return;
+    }
+
     // Check if value is a valid number
-    if (NUMBER_REGEX.test(value)) {
+    if (this.checkValidity(value)) {
       // Check if value has a decimal separator
       if (DECIMAL_REGEX.test(value)) {
         if (this.isInteger()) {
@@ -317,6 +341,17 @@ class NumberEditorBase extends React.Component<NumberEditorBaseProps, NumberEdit
           this.internalSetState({
             value: 0,
             displayValue: `0${displayValue}`,
+            isInvalid: false
+          });
+          return;
+        }
+
+        // Add "0" in front of the decimal separator if the decimal separator succeds the negative symbol
+        if (NEGATIVE_DECIMAL_REGEX.test(value)) {
+          const negativeFormattedValue = `-0${removeNegativeSymbol(displayValue)}`;
+          this.internalSetState({
+            value: parseFloat(negativeFormattedValue),
+            displayValue: negativeFormattedValue,
             isInvalid: false
           });
           return;
@@ -439,11 +474,11 @@ const errorMessage =
   "Invalid format. Only numbers and single decimal separator are allowed.";
 const errorIcon = <Icon name="exclamation circle" link />;
 
-interface GridNumberEditorProps {
+type GridNumberEditorProps = Pick<NumberEditorProps, 'allowNegative'> & {
   defaultValue?: number;
-  autoFocus?: boolean;
   children?: NumberEditorChildren;
-}
+  autoFocus?: boolean;
+};
 
 interface GridNumberEditorState {
   value?: number;
@@ -530,7 +565,7 @@ export const GridTechRateEditor = gridNumberEditorFactory<GridTechRateEditorProp
   extraFractionDigits: extraFractionDigits.TECH_RATE
 });
 
-type FormNumberEditorProps = Pick<NumberEditorProps, 'value' | 'onChange'> & {
+type FormNumberEditorProps = Pick<NumberEditorProps, 'value' | 'onChange' | 'allowNegative'> & {
   children?: NumberEditorChildren;
 };
 
