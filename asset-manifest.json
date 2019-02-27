@@ -1,13 +1,13 @@
 {
-  "main.css": "/intl-editors/static/css/main.9e9cc50f.chunk.css",
-  "main.js": "/intl-editors/static/js/main.326cb23c.chunk.js",
-  "main.js.map": "/intl-editors/static/js/main.326cb23c.chunk.js.map",
+  "main.css": "/intl-editors/static/css/main.44dc73dc.chunk.css",
+  "main.js": "/intl-editors/static/js/main.419ff4d4.chunk.js",
+  "main.js.map": "/intl-editors/static/js/main.419ff4d4.chunk.js.map",
   "static/js/1.202d4bb7.chunk.js": "/intl-editors/static/js/1.202d4bb7.chunk.js",
   "static/js/1.202d4bb7.chunk.js.map": "/intl-editors/static/js/1.202d4bb7.chunk.js.map",
   "runtime~main.js": "/intl-editors/static/js/runtime~main.70790b2a.js",
   "runtime~main.js.map": "/intl-editors/static/js/runtime~main.70790b2a.js.map",
-  "static/css/main.9e9cc50f.chunk.css.map": "/intl-editors/static/css/main.9e9cc50f.chunk.css.map",
+  "static/css/main.44dc73dc.chunk.css.map": "/intl-editors/static/css/main.44dc73dc.chunk.css.map",
   "index.html": "/intl-editors/index.html",
-  "precache-manifest.65fd2498acaea1fbb6c5c546c8832489.js": "/intl-editors/precache-manifest.65fd2498acaea1fbb6c5c546c8832489.js",
+  "precache-manifest.afb2dbd955660603f1a9689d4c8461ae.js": "/intl-editors/precache-manifest.afb2dbd955660603f1a9689d4c8461ae.js",
   "service-worker.js": "/intl-editors/service-worker.js"
 }
